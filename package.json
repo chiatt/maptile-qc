@@ -1,0 +1,19 @@
+{
+  "name": "maptile-qc",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Cyrus Hiatt",
+  "license": "ISC",
+  "preferGlobal":true,
+  "dependencies": {
+    "bluebird": "~2.9.33",
+    "gm": "~1.18.1",
+    "node-getopt": "~0.2.3"
+  },
+  "bin": {
+  	"tile_validator":"index.js"
+  }
+}
