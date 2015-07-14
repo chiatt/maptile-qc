@@ -33,7 +33,6 @@ module.exports.createTile = function(id, zoom, tile, x, y, flag) {
 				}, this);
 
 			line = result.join('|');
-			console.log(line)
 			return line;
 			}
 		,asGeoJson: function(){
