@@ -11,7 +11,8 @@
   "dependencies": {
     "bluebird": "~2.9.33",
     "gm": "~1.18.1",
-    "node-getopt": "~0.2.3"
+    "node-getopt": "~0.2.3",
+    "turf": "~2.0.2"
   },
   "bin": {
     "maptile-qc": "index.js"

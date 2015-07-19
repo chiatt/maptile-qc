@@ -18,8 +18,8 @@ Generates a csv and geojson file reporting details about a tile cache at sampled
 -o, --outputfile
 >outputfile without extension
 
--l, --locations   
->number of locations to sample
+-c, --cellsize   
+>distance between sample points in sample grid
 
 -r, --zoomrange
 >comma delimited range of zoom levels to sample e.g. "2,10" (no spaces)
