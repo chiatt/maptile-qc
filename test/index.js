@@ -13,5 +13,3 @@ describe('#getLocations', function() {
     expect(getLocations(2)[0].y).to.be.within(-90, 90);
   });
 });
-
-// expect([{a:'a'}, {a:'b'}]).to.deep.have.same.members([{a:'a'}, {a:'b'}]);

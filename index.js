@@ -3,6 +3,7 @@ var _ = require('underscore');
 var Promise = require('bluebird')
 var fs = Promise.promisifyAll(require('fs'));
 var qc = require('./qc');
+var path = require('path')
 var getopt = require('node-getopt').create([
   ['r' , 'zoomrange=ARG'  , 'comma delimited range of zoom levels to sample e.g. "2,10"'],
   ['l' , 'locations=ARG'  , 'number of locations to sample'],
@@ -19,11 +20,9 @@ var zoomrange = getopt.options.zoomrange.split(',')
 var minZoom = parseInt(zoomrange[0]);
 var maxZoom = parseInt(zoomrange[1]);
 var locationSampleSize = getopt.options.locations;
-var geojsonFile = getopt.options.outputfile + '.geojson';
-var csvFile = getopt.options.outputfile + '.csv';
-
-var geojson = [];
-var csv = [];
+var outputFile = getopt.options.outputfile;
+var outputPathExt = path.extname(outputFile).replace('.', '')
+var records = [];
 
 function main() {
 	locations = qc.getLocations(locationSampleSize);
@@ -34,15 +33,16 @@ function main() {
 			if (fs.existsSync(tileToQc) === false) {
 				var flag = 'missing'
 				var missingTile = qc.createTile(location['id'], zoom_level, tileToQc, location['x'], location['y'], flag)
-				geojson.push(missingTile.asGeoJson())
-				csv.push(missingTile.asString())
+				records.push(missingTile[outputPathExt]())
 			} else {
 				qc.createReportRecord( zoom_level, location, tileToQc, '', function(ret){
-					geojson.push(ret.asGeoJson())
-					csv.push(ret.asString())
-					if (geojson.length === (maxZoom - minZoom) * locationSampleSize) {
-						fs.writeFileAsync(geojsonFile, JSON.stringify({ type: "FeatureCollection", features: geojson}))
-						fs.writeFileAsync(csvFile, csv.join('\n'))
+					records.push(ret[outputPathExt]())
+					if (records.length === (maxZoom - minZoom) * locationSampleSize) {
+						if (outputPathExt === 'geojson') {
+							fs.writeFileAsync(outputFile, JSON.stringify({ type: "FeatureCollection", features: records}))
+						} else if (outputPathExt === 'csv') {
+							fs.writeFileAsync(outputFile, records.join('\n'))
+						}
 					}
 				})
 			}

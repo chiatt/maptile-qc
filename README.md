@@ -10,7 +10,7 @@ Requirements
 Usage
 =======
 
-Generates a csv and geojson file reporting details about a tile cache at sampled locations and specified zoom levels. The output file name will have the csv and geojson extensions added to it. Don't use the name of an existing file in the output directory as any csv or geojson files with that name will be over-written. (I will change this soon)
+Generates a csv and geojson file reporting details about a tile cache at sampled locations and specified zoom levels.
 
 -t, --tilecache   
 >tile cache directory
