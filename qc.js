@@ -2,6 +2,7 @@
 
 var _ = require('underscore');
 var Promise = require('bluebird')
+var turf = require('turf');
 var gm = require('gm').subClass({imageMagick: true});
 Promise.promisifyAll(gm.prototype)
 
@@ -59,16 +60,36 @@ module.exports.identifyTile = function(location, zoom_level, tile_extension) {
     return "/" + zoom_level + "/" + x + "/" + y + "." + tile_extension
 }
 
-module.exports.getLocations = function(numOfLocations) {
-    var iter = _.range(numOfLocations)
-    var locations = [];
-    _.each(iter, function(i){
-        var randx = _.random(0,100)/100;
-        var randy = _.random(0, 100)/100;
-        locations.push({'id': i, 'x': -122 + randy, 'y': 37 + randx})
-    }, this);
+// module.exports.getLocations = function(numOfLocations, extent) {
+//     var iter = _.range(numOfLocations)
+//     var locations = [];
+//     _.each(iter, function(i){
+//         var randx = _.random(xmin, xmax);
+//         var randy = _.random(ymin, ymax);
+//         var randxDecimal = _.random(0,100)/100;
+//         var randyDecimal = _.random(0, 100)/100;
+//         locations.push({'id': i, 'x': randx + randxDecimal, 'y': randy + randyDecimal})
+//     }, this);
+//     return locations;
+// }
+
+module.exports.getLocations = function(extent, cellSize) {
+    var units = 'degrees';
+    var minx = parseFloat(extent[0])
+    var miny = parseFloat(extent[1])
+    var maxx = parseFloat(extent[2])
+    var maxy = parseFloat(extent[3])
+    var grid = turf.pointGrid([minx, miny, maxx, maxy], cellSize, units);
+    locations = [];
+    points = grid.features
+    _.each(points, function(point, i){
+        var x = point.geometry.coordinates[0];
+        var y = point.geometry.coordinates[1];
+        locations.push({'id': i, 'x': x, 'y': y})
+    })
     return locations;
 }
+
 
 module.exports.verifyTile = function(image, tile_type) {
     mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 'I':32, 'F':32}
