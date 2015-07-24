@@ -3,7 +3,7 @@
 var _ = require('underscore');
 var Promise = require('bluebird')
 var turf = require('turf');
-var gm = require('gm').subClass({imageMagick: true});
+var gm = require('gm').subClass({imageMagick: false});
 Promise.promisifyAll(gm.prototype)
 
 module.exports.createTile = function(id, zoom, tile, x, y, flag) {
@@ -11,7 +11,7 @@ module.exports.createTile = function(id, zoom, tile, x, y, flag) {
     var tile = {
         id : id,
         zoom : zoom,
-        tile : tile,
+        tilepath : tile,
         colors : 0,
         flag : flag,
         x : x,
@@ -60,19 +60,6 @@ module.exports.identifyTile = function(location, zoom_level, tile_extension) {
     return "/" + zoom_level + "/" + x + "/" + y + "." + tile_extension
 }
 
-// module.exports.getLocations = function(numOfLocations, extent) {
-//     var iter = _.range(numOfLocations)
-//     var locations = [];
-//     _.each(iter, function(i){
-//         var randx = _.random(xmin, xmax);
-//         var randy = _.random(ymin, ymax);
-//         var randxDecimal = _.random(0,100)/100;
-//         var randyDecimal = _.random(0, 100)/100;
-//         locations.push({'id': i, 'x': randx + randxDecimal, 'y': randy + randyDecimal})
-//     }, this);
-//     return locations;
-// }
-
 module.exports.getLocations = function(extent, cellSize) {
     var units = 'degrees';
     var minx = parseFloat(extent[0])
@@ -82,6 +69,7 @@ module.exports.getLocations = function(extent, cellSize) {
     var grid = turf.pointGrid([minx, miny, maxx, maxy], cellSize, units);
     locations = [];
     points = grid.features
+    console.log(points.length)
     _.each(points, function(point, i){
         var x = point.geometry.coordinates[0];
         var y = point.geometry.coordinates[1];
@@ -89,7 +77,6 @@ module.exports.getLocations = function(extent, cellSize) {
     })
     return locations;
 }
-
 
 module.exports.verifyTile = function(image, tile_type) {
     mode_to_bpp = {'1':1, 'L':8, 'P':8, 'RGB':24, 'RGBA':32, 'CMYK':32, 'YCbCr':24, 'I':32, 'F':32}
@@ -100,11 +87,10 @@ module.exports.verifyTile = function(image, tile_type) {
     }
 }
 
-module.exports.createReportRecord = function(zoom_level, location, tileToQc, flag, cb) {
-    var tile = module.exports.createTile(location['id'], zoom_level, tileToQc, location['x'], location['y'], flag)
-    var img = gm(tileToQc);
+module.exports.createReportRecord = function(tile, cb) {
+    var img = gm(tile.tilepath);
     img.formatAsync()
-    .then(function(format){
+    .then(function(format, error){
         img.depthAsync()
     .then(function(depth){
         img.filesizeAsync()
@@ -125,4 +111,4 @@ module.exports.createReportRecord = function(zoom_level, location, tileToQc, fla
     })
     })
     })
-    }
+}

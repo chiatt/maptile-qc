@@ -30,29 +30,38 @@ var outputPathExt = path.extname(outputFile).replace('.', '')
 var records = [];
 
 function main() {
+	var checkedTiles = [];
+	var preppedTiles = [];
 	locations = qc.getLocations(extent, cellSize);
 	_.each(locations, function(location){
 		_.each(_.range(minZoom, maxZoom), function(zoom_level){
-			var tile = qc.identifyTile(location, zoom_level, 'png');
-			var tileToQc = tilecacheDir + tile;
-			if (fs.existsSync(tileToQc) === false) {
-				var flag = 'missing'
-				var missingTile = qc.createTile(location['id'], zoom_level, tileToQc, location.x, location.y, flag)
-				records.push(missingTile[outputPathExt]())
-			} else {
-				qc.createReportRecord( zoom_level, location, tileToQc, '', function(ret){
-					records.push(ret[outputPathExt]())
-					if (records.length === (maxZoom - minZoom) * locations.length) {
-						if (outputPathExt === 'geojson') {
-							fs.writeFileAsync(outputFile, JSON.stringify({ type: "FeatureCollection", features: records}))
-						} else if (outputPathExt === 'csv') {
-							fs.writeFileAsync(outputFile, records.join('\n'))
-						}
-					}
-				})
+			var tilepath = qc.identifyTile(location, zoom_level, 'png');
+			console.log(tilepath)
+			if (_.contains(checkedTiles, tilepath) === false) {
+				var tileToQc = tilecacheDir + tilepath;
+				var flag = fs.existsSync(tileToQc) === false ? 'missing' : '';
+				var tile = qc.createTile(location['id'], zoom_level, tileToQc, location.x, location.y, flag)
+				if (flag === 'missing') {
+					records.push(tile[outputPathExt]());
+				} else {
+					preppedTiles.push(tile)
+				}
+				checkedTiles.push(tilepath);
+			} 
+		});
+	});
+	_.each(preppedTiles, function(tile){
+		qc.createReportRecord(tile, function(ret){
+			records.push(ret[outputPathExt]())
+			if (records.length === checkedTiles.length){
+				if (outputPathExt === 'geojson') {
+					fs.writeFileAsync(outputFile, JSON.stringify({ type: "FeatureCollection", features: records}))
+				} else if (outputPathExt === 'csv') {
+					fs.writeFileAsync(outputFile, records.join('\n'))
+				}
 			}
 		});
 	});
-	}
+}
 
 main();

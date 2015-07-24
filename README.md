@@ -29,5 +29,4 @@ Generates a csv and geojson file reporting details about a tile cache at sampled
 
 EXAMPLE: 
 
-        $ maptile-qc -t /home/me/my_tile_cache -o /home/me/temp/outputfile -l 20 -r 2,10 
-
+        $ maptile-qc -t /home/me/my_tile_cache -o /home/me/temp/outputfile -c 0.05 -r 2,10 -e -122,36,-120,37
