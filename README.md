@@ -25,7 +25,7 @@ Generates a csv and geojson file reporting details about a tile cache at sampled
 >comma delimited range of zoom levels to sample e.g. "2,10" (no spaces)
 
 -e, --extent
-> sample extent: xmin,ymin,xmax,ymax
+>sample extent: xmin,ymin,xmax,ymax
 
 -h, --help
 >display this help
