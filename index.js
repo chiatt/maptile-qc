@@ -36,7 +36,6 @@ function main() {
 	_.each(locations, function(location){
 		_.each(_.range(minZoom, maxZoom), function(zoom_level){
 			var tilepath = qc.identifyTile(location, zoom_level, 'png');
-			console.log(tilepath)
 			if (_.contains(checkedTiles, tilepath) === false) {
 				var tileToQc = tilecacheDir + tilepath;
 				var flag = fs.existsSync(tileToQc) === false ? 'missing' : '';
@@ -54,6 +53,7 @@ function main() {
 		qc.createReportRecord(tile, function(ret){
 			records.push(ret[outputPathExt]())
 			if (records.length === checkedTiles.length){
+				console.log('Writing results to', outputFile)
 				if (outputPathExt === 'geojson') {
 					fs.writeFileAsync(outputFile, JSON.stringify({ type: "FeatureCollection", features: records}))
 				} else if (outputPathExt === 'csv') {

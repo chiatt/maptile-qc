@@ -69,7 +69,7 @@ module.exports.getLocations = function(extent, cellSize) {
     var grid = turf.pointGrid([minx, miny, maxx, maxy], cellSize, units);
     locations = [];
     points = grid.features
-    console.log(points.length)
+    console.log('Checking', points.length, 'locations')
     _.each(points, function(point, i){
         var x = point.geometry.coordinates[0];
         var y = point.geometry.coordinates[1];

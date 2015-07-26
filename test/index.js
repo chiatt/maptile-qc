@@ -3,6 +3,8 @@ var expect = require('chai').expect,
     gv = require('geojson-validation'),
     extent = ['-180','-90','180','90'],
     getLocations = qc.getLocations;
+    Promise = require('bluebird')
+    fs = Promise.promisifyAll(require('fs'));
 
 describe('#getLocations', function() {
   it('returns an array of loctions;', function() {
@@ -24,3 +26,41 @@ describe('#createTile.geojson', function() {
     expect(isValid).to.be.true;
   });
 });
+
+describe('#identifyTile', function() {
+  it('locates a test tile in the test directory;', function() {
+    var tilepath = qc.identifyTile({'x':-122.4,'y':37.7}, 10, 'png')
+    var fileExists = fs.existsSync('test/data' + tilepath);
+    expect(fileExists).to.be.true;
+  });
+});
+
+describe('#createReportRecord', function() {
+    var tilepath = qc.identifyTile({'x':-122.4,'y':37.7}, 10, 'png')
+    var testtile = qc.createTile(0, 10, 'test/data' + tilepath, -122.4, 37.7, '')
+  it('returns a record with expected image format;', function(done) {
+    qc.createReportRecord(testtile, function(record){
+      done();
+      expect(record.format).to.equal('PNG');
+    })
+  });
+  it('returns a record with expected depth;', function(done) {
+    qc.createReportRecord(testtile, function(record){
+      done();
+      expect(record.depth).to.equal('8');
+    })
+  });
+  it('returns a record with expected colors;', function(done) {
+    qc.createReportRecord(testtile, function(record){
+      done();
+      expect(record.colors).to.equal(256);
+    })
+  });
+  it('returns a record with expected filesize;', function(done) {
+    qc.createReportRecord(testtile, function(record){
+      done();
+      expect(record.filesize).to.equal('18.4K');
+    })
+  });
+});
+
