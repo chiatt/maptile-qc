@@ -27,9 +27,18 @@ Generates a csv and geojson file reporting details about a tile cache at sampled
 -e, --extent
 >sample extent: xmin,ymin,xmax,ymax
 
+-f, --samplefile
+>a geojson file with sample locations to use instead of generating a point grid
+
 -h, --help
 >display this help
 
-EXAMPLE: 
+EXAMPLES: 
 
-        $ maptile-qc -t /home/me/my_tile_cache -o /home/me/temp/outputfile -c 0.05 -r 2,10 -e -122,36,-120,37
+>generated sample grid requires a cell size and extent:
+
+    $ maptile-qc -t ~/my_tile_cache -o ~/temp/outputfile -c 0.05 -r 2,10 -e -122,36,-120,37
+
+>sample loaded from a geojsonfile:
+
+    $ maptile-qc -t ~/my_tile_cache -o ~/temp/outputfile -r 2,10 -f '~/samplepoints.geojson'

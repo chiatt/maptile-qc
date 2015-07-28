@@ -3,8 +3,17 @@
 var _ = require('underscore');
 var Promise = require('bluebird')
 var turf = require('turf');
+var fs = Promise.promisifyAll(require('fs'));
 var gm = require('gm').subClass({imageMagick: false});
 Promise.promisifyAll(gm.prototype)
+
+module.exports.readSample = function(filename, cb){
+    fs.readFileAsync(filename, "utf8", function(err, data) {
+        if (err) throw err;
+    }).then(function(ret){        
+        cb(JSON.parse(ret));
+    });  
+}
 
 module.exports.createTile = function(id, zoom, tile, x, y, flag) {
     var geom = 'wkt';
@@ -60,6 +69,18 @@ module.exports.identifyTile = function(location, zoom_level, tile_extension) {
     return "/" + zoom_level + "/" + x + "/" + y + "." + tile_extension
 }
 
+module.exports.geoJsonToLocations = function(geojson) {
+    locations = [];
+    points = geojson.features
+    console.log('Checking', points.length, 'locations')
+    _.each(points, function(point, i){
+        var x = point.geometry.coordinates[0];
+        var y = point.geometry.coordinates[1];
+        locations.push({'id': i, 'x': x, 'y': y})
+    })
+    return locations
+}
+
 module.exports.getLocations = function(extent, cellSize) {
     var units = 'degrees';
     var minx = parseFloat(extent[0])
@@ -67,15 +88,7 @@ module.exports.getLocations = function(extent, cellSize) {
     var maxx = parseFloat(extent[2])
     var maxy = parseFloat(extent[3])
     var grid = turf.pointGrid([minx, miny, maxx, maxy], cellSize, units);
-    locations = [];
-    points = grid.features
-    console.log('Checking', points.length, 'locations')
-    _.each(points, function(point, i){
-        var x = point.geometry.coordinates[0];
-        var y = point.geometry.coordinates[1];
-        locations.push({'id': i, 'x': x, 'y': y})
-    })
-    return locations;
+    return module.exports.geoJsonToLocations(grid);
 }
 
 module.exports.createReportRecord = function(tile, cb) {

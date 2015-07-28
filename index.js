@@ -7,6 +7,7 @@ var path = require('path')
 var getopt = require('node-getopt').create([
   ['r' , 'zoomrange=ARG'  , 'comma delimited range of zoom levels to sample e.g. "2,10"'],
   ['l' , 'locations=ARG'  , 'number of locations to sample'],
+  ['f' , 'samplefile=ARG'  , 'geojson file with sample points'],
   ['t' , 'tilecache=ARG'  , 'tile cache directory'],
   ['o' , 'outputfile=ARG'  , 'outputfile without extension'],
   ['e' , 'extent=ARG'  , 'sample region: xmin ymin xmax ymax'],
@@ -18,21 +19,22 @@ var getopt = require('node-getopt').create([
 .parseSystem();
 
 var tilecacheDir = getopt.options.tilecache;
-var zoomrange = getopt.options.zoomrange.split(',');
-
+var zoomrangeInput = getopt.options.zoomrange;
+var zoomrange = zoomrangeInput === undefined ? [10,15] : zoomrangeInput.split(',');
 var extentInput = getopt.options.extent;
 var extent = extentInput === undefined ? [-180,-90,180,90] : extentInput.split(',');
 var minZoom = parseInt(zoomrange[0]);
 var maxZoom = parseInt(zoomrange[1]);
 var cellSize = parseFloat(getopt.options.cellsize);
 var outputFile = getopt.options.outputfile;
+var sampleFile = getopt.options.samplefile;
 var outputPathExt = path.extname(outputFile).replace('.', '')
 var records = [];
+var metadata = {'zoomrange':zoomrange, 'tilecache':tilecacheDir, 'outputfile':outputFile}
 
-function main() {
+function writeResults(locations) {
 	var checkedTiles = [];
 	var preppedTiles = [];
-	locations = qc.getLocations(extent, cellSize);
 	_.each(locations, function(location){
 		_.each(_.range(minZoom, maxZoom), function(zoom_level){
 			var tilepath = qc.identifyTile(location, zoom_level, 'png');
@@ -59,9 +61,23 @@ function main() {
 				} else if (outputPathExt === 'csv') {
 					fs.writeFileAsync(outputFile, records.join('\n'))
 				}
+				fs.writeFileAsync(outputFile + '.metadata', JSON.stringify(metadata, null, 2));
 			}
 		});
 	});
 }
 
-main();
+if (sampleFile !== undefined) {
+	qc.readSample(sampleFile, function(res){
+		var locations = qc.geoJsonToLocations(res)
+		metadata.samplefile = sampleFile
+		metadata.locations = locations.length
+		writeResults(locations)
+	})
+} else {
+	locations = qc.getLocations(extent, cellSize);
+	metadata.extent = extent;
+	metadata.cellsize = cellSize;
+	metadata.locations = locations.length;
+	writeResults(locations);
+}

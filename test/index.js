@@ -18,6 +18,16 @@ describe('#getLocations', function() {
   });
 });
 
+describe('#readSample', function() {
+  it('returns valid geojson;', function(done) {
+      qc.readSample('/home/cyrus/Projects/temp/tilevalidator/test.geojson', function(res){
+      done();
+      var isValid = gv.valid(res);
+      expect(isValid).to.be.true;
+    })
+  });
+});
+
 describe('#createTile.geojson', function() {
   it('returns valid geojson;', function() {
     var testtile = qc.createTile(0, 10, 'a/test/path', '-122', '37.0', '')
