@@ -33,12 +33,12 @@ Generates a csv and geojson file reporting details about a tile cache at sampled
 -h, --help
 >display this help
 
-EXAMPLES: 
+EXAMPLES:
 
 >generated sample grid requires a cell size and extent:
 
     $ maptile-qc -t ~/my_tile_cache -o ~/temp/outputfile -c 0.05 -r 2,10 -e -122,36,-120,37
 
->sample loaded from a geojsonfile:
+>sample data loaded from a geojson file:
 
     $ maptile-qc -t ~/my_tile_cache -o ~/temp/outputfile -r 2,10 -f '~/samplepoints.geojson'
